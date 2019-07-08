@@ -5,8 +5,9 @@
     <el-input
       class="search-input"
       placeholder="Please type a search text"
-      v-model="search"
+      v-model="queryParams.name"
       clearable
+      @keyup.enter.native="checkEnter"
       @clear="onClear"
     ></el-input>
     <el-button type="primary" icon="el-icon-search" @click="onSubmit">Search</el-button>
@@ -56,8 +57,8 @@ export default {
 
   data() {
     return {
-      search: '',
       queryParams: {
+        name: '',
         page: 1,
         size: 10
       }
@@ -69,30 +70,37 @@ export default {
 
     onSubmit() {
       this.clear()
-      this.findBooks(this.search)
+      this.queryParams.page = 1
+      this.$nextTick().then(() => {
+        this.findBooks(this.queryParams)
+      })
+    },
+
+    checkEnter(event) {
+      console.log(event)
+      if (event.keyCode === 13) {
+        this.findBooks(this.queryParams)
+      }
     },
 
     onClear() {
       this.clear()
+      this.queryParams.page = 1
     },
 
     async handleSizeChangePagination(val) {
       this.queryParams.size = val
-      await this.findBooks(this.search, this.queryParams)
+      await this.findBooks(this.queryParams)
     },
 
     async handleCurrentChangePagination(val) {
       this.queryParams.page = val
-      await this.findBooks(this.search, this.queryParams)
+      await this.findBooks(this.queryParams)
     }
   },
 
   computed: {
-    ...mapGetters(['isLoading', 'books']),
-
-    total() {
-      return this.books.length
-    }
+    ...mapGetters(['isLoading', 'books', 'total'])
   }
 }
 </script>
@@ -115,7 +123,7 @@ a {
 }
 .search-input {
   width: 600px;
-  margin-top: 300px;
+  margin-top: 50px;
   margin-right: 8px;
 }
 </style>

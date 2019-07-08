@@ -49,6 +49,20 @@ module.exports = {
             'dup_files.name': 1,
             'dup_files.size': 1
           }
+        },
+        {
+          $facet: {
+            books: [
+              { $skip: args.page - 1 },
+              { $limit: args.size },
+            ],
+            pageInfo: [
+              { $group: { _id: null, count: { $sum: 1 } } },
+            ],
+          }
+        },
+        {
+          $unwind: '$pageInfo'
         }
       ])
       .toArray()

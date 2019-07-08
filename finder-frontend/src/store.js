@@ -8,7 +8,8 @@ Vue.use(Vuex)
 const state = {
   isLoading: false,
   bookIds: [],
-  books: {}
+  books: {},
+  total: 0
 }
 
 const mutations = {
@@ -21,7 +22,7 @@ const mutations = {
     state.books = {}
   },
 
-  SET_BOOKS(state, { books }) {
+  SET_BOOKS(state, { books, total }) {
     const ids = books.map(x => x._id)
 
     for (let id in ids) {
@@ -41,6 +42,8 @@ const mutations = {
         },
       }
     }
+
+    state.total = total
   }
 }
 
@@ -53,27 +56,35 @@ const actions = {
     console.timeEnd(`clear`)
   },
 
-  async findBooks({ commit }, name) {
-    console.time(`findBooks ${name}`)
+  async findBooks({ commit }, { name, page, size }) {
+    commit('CLEAR_BOOKS')
+    console.time(`findBooks ${name}, ${page}, ${size}`)
 
     // Follow query is using variables and aliases which are $name variable and books alias.
     const query = gql`
-    query FindBooks($name: String!) {
-      books: findBooks(name: $name) {
-        _id
-        name
-        path
-        size
-        dup_files {
+    query FindBooks($name: String!, $page: Int!, $size: Int!) {
+      results: findBooks(name: $name, page: $page, size: $size) {
+        pageInfo {
+          count
+        }
+        books {
+          _id
           name
           path
           size
+          dup_files {
+            name
+            path
+            size
+          }
         }
       }
     }`
 
     const variables = {
-      name
+      name,
+      page,
+      size
     }
 
     commit('SET_LOADING', true)
@@ -82,13 +93,15 @@ const actions = {
       query, variables
     })
 
-    const { books } = response.data
-    commit('SET_BOOKS', { books })
+    if (response.data.results.length > 0) {
+      const { books, pageInfo } = response.data.results[0]
+      commit('SET_BOOKS', { books, total: pageInfo.count })
+      console.log(response.data.results)
+    }
 
     commit('SET_LOADING', false)
 
-    console.log(response.data.books)
-    console.timeEnd(`findBooks ${name}`)
+    console.timeEnd(`findBooks ${name}, ${page}, ${size}`)
   }
 }
 
@@ -99,6 +112,10 @@ const getters = {
 
   books(state) {
     return Object.values(state.books)
+  },
+
+  total(state) {
+    return state.total
   }
 }
 
