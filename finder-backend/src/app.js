@@ -2,6 +2,7 @@ require('./lib/env').config()
 const Koa = require('koa')
 const { ApolloServer } = require('apollo-server-koa')
 const MongoClient = require('mongodb')
+const serve = require('koa-static')
 const db = require('./db')
 
 const main = async () => {
@@ -29,6 +30,8 @@ const main = async () => {
     })
 
     const app = new Koa()
+    app.use(serve('/Volumes/Second_Disk/Dropbox/Docs/'))
+
     server.applyMiddleware({ app })
 
     app.listen({ port: 4000 }, () =>

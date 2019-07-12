@@ -53,7 +53,7 @@ module.exports = {
         {
           $facet: {
             books: [
-              { $skip: args.page - 1 },
+              { $skip: (args.page - 1) * args.size },
               { $limit: args.size },
             ],
             pageInfo: [

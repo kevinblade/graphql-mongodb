@@ -8,9 +8,9 @@
       v-model="queryParams.name"
       clearable
       @keyup.enter.native="checkEnter"
-      @clear="onClear"
+      @clear="handleClear"
     ></el-input>
-    <el-button type="primary" icon="el-icon-search" @click="onSubmit">Search</el-button>
+    <el-button type="primary" icon="el-icon-search" @click="handleClickSearch">Search</el-button>
     <el-table :data="books" stripe style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -19,10 +19,21 @@
           </el-table>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="Name" width="380"></el-table-column>
+      <el-table-column prop="name" label="Name" width="550">
+        <template slot-scope="scope">
+          <span style="font-weight: bold">{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="dup_count" width="20"></el-table-column>
       <el-table-column prop="size" label="Size" width="100"></el-table-column>
-      <el-table-column prop="path" label="Path"></el-table-column>
+      <el-table-column prop="path" label="Path">
+        <template slot-scope="scope">
+          <a
+            style="font-weight: bold"
+            @click="handleClickPath"
+          >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
+        </template>
+      </el-table-column>
     </el-table>
     <div class="pagination-container">
       <el-pagination
@@ -68,12 +79,22 @@ export default {
   methods: {
     ...mapActions(['clear', 'findBooks']),
 
-    onSubmit() {
+    handleClickSearch() {
       this.clear()
       this.queryParams.page = 1
       this.$nextTick().then(() => {
         this.findBooks(this.queryParams)
       })
+    },
+
+    handleClickPath(event) {
+      event.preventDefault()
+      const url = `http://localhost:4000/${event.target.text.replace(
+        / \/ /g,
+        '/'
+      )}`
+      console.log(url)
+      window.open(url)
     },
 
     checkEnter(event) {
@@ -83,7 +104,7 @@ export default {
       }
     },
 
-    onClear() {
+    handleClear() {
       this.clear()
       this.queryParams.page = 1
     },
