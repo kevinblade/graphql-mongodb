@@ -12,6 +12,8 @@
     "core-js": "^2.6.5",
     "element-ui": "^2.3.6",
     "graphql": "^14.4.2",
+    "moment": "^2.24.0",
+    "pretty-bytes": "^5.2.0",
     "vue": "^2.6.10",
     "vue-apollo": "^3.0.0-rc.1",
     "vue-router": "^3.0.3",

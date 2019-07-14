@@ -5,6 +5,7 @@ module.exports = `
     name: String
     path: String
     size: Int
+    mtime: String
     dup_files: [DupBook]
   }
 `

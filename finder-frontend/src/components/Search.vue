@@ -15,21 +15,47 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-table :data="props.row.dup_files" stripe style="width: 100%">
-            <el-table-column prop="path" label="Duplicated Path"></el-table-column>
+            <el-table-column prop="size" label="Size" width="100">
+              <template slot-scope="scope">
+                <span class="highlight-col">{{ size(scope.row.size) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="mtime" label="Modification Date" width="200">
+              <template slot-scope="scope">
+                <span class="highlight-col">{{ mtime(scope.row.mtime) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="path" label="Duplicated Path">
+              <template slot-scope="scope">
+                <a
+                  class="highlight-col"
+                  @click="handleClickPath"
+                >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-table-column>
       <el-table-column prop="name" label="Name" width="550">
         <template slot-scope="scope">
-          <span style="font-weight: bold">{{ scope.row.name }}</span>
+          <span class="highlight-col">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="dup_count" width="20"></el-table-column>
-      <el-table-column prop="size" label="Size" width="100"></el-table-column>
+      <el-table-column prop="size" label="Size" width="100">
+        <template slot-scope="scope">
+          <span class="highlight-col">{{ size(scope.row.size) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="mtime" label="Modification Date" width="200">
+        <template slot-scope="scope">
+          <span class="highlight-col">{{ mtime(scope.row.mtime) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="path" label="Path">
         <template slot-scope="scope">
           <a
-            style="font-weight: bold"
+            class="highlight-col"
             @click="handleClickPath"
           >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
         </template>
@@ -53,6 +79,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import moment from 'moment'
+import prettyBytes from 'pretty-bytes'
 import Book from './Book'
 
 export default {
@@ -100,7 +128,11 @@ export default {
     checkEnter(event) {
       console.log(event)
       if (event.keyCode === 13) {
-        this.findBooks(this.queryParams)
+        this.clear()
+        this.queryParams.page = 1
+        this.$nextTick().then(() => {
+          this.findBooks(this.queryParams)
+        })
       }
     },
 
@@ -117,6 +149,15 @@ export default {
     async handleCurrentChangePagination(val) {
       this.queryParams.page = val
       await this.findBooks(this.queryParams)
+    },
+
+    mtime(value) {
+      const mt = moment(parseInt(value))
+      return mt.format('YYYY-MM-DD HH:mm')
+    },
+
+    size(value) {
+      return prettyBytes(parseInt(value))
     }
   },
 
@@ -146,5 +187,8 @@ a {
   width: 600px;
   margin-top: 50px;
   margin-right: 8px;
+}
+.highlight-col {
+  font-weight: bold;
 }
 </style>

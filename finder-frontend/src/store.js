@@ -72,10 +72,12 @@ const actions = {
           name
           path
           size
+          mtime
           dup_files {
             name
             path
             size
+            mtime
           }
         }
       }
