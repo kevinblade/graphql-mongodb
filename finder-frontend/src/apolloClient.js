@@ -2,5 +2,5 @@ import ApolloClient from 'apollo-boost'
 
 export default new ApolloClient({
   // You should use an absolute URL here
-  uri: 'http://localhost:4000/graphql'
+  uri: `http://${process.env.VUE_APP_BACKEND_HOST}:4000/graphql`
 })

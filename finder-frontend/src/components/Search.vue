@@ -117,10 +117,10 @@ export default {
 
     handleClickPath(event) {
       event.preventDefault()
-      const url = `http://localhost:4000/${event.target.text.replace(
-        / \/ /g,
-        '/'
-      )}`
+      console.log(`VUE_APP_BACKEND_HOST = ${process.env.VUE_APP_BACKEND_HOST}`)
+      const url = `http://${
+        process.env.VUE_APP_BACKEND_HOST
+      }:4000/${event.target.text.replace(/ \/ /g, '/')}`
       console.log(url)
       window.open(url)
     },

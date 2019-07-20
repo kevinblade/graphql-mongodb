@@ -1,0 +1,33 @@
+version: '3'
+services:
+  finder-backend:
+    restart: always
+    container_name: compose_finder-backend
+    build:
+      context: ./finder-backend
+      dockerfile: ./Dockerfile
+    networks:
+      - docker_default
+    external_links:
+      - 'compose_mongodb:mongo'
+    ports:
+      - '4000:4000'
+    image: 'freedom-lab/finder-backend:v1'
+
+  finder-frontend:
+    restart: always
+    container_name: compose_finder-frontend
+    build:
+      context: ./finder-frontend
+      dockerfile: ./Dockerfile
+    networks:
+      - docker_default
+    links:
+      - 'finder-backend:finder-backend'
+    ports:
+      - '8800:80'
+    image: 'freedom-lab/finder-frontend:v1'
+
+networks:
+  docker_default:
+    external: true

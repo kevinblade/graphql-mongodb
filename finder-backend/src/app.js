@@ -7,7 +7,8 @@ const db = require('./db')
 
 const main = async () => {
   try {
-    const client = await MongoClient.connect(process.env.DB_URL)
+    console.log(`DB_URL = ${process.env.DB_URL}`)
+    const client = await MongoClient.connect(process.env.DB_URL, { useNewUrlParser: true })
     const files = client.db('books').collection('files')
     console.log('MongoDB connection is opened.')
 
