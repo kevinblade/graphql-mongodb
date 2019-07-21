@@ -9,6 +9,7 @@
       clearable
       @keyup.enter.native="checkEnter"
       @clear="handleClear"
+      style="ime-mode:auto;"
     ></el-input>
     <el-button type="primary" icon="el-icon-search" @click="handleClickSearch">Search</el-button>
     <el-table :data="books" stripe style="width: 100%">
@@ -107,11 +108,16 @@ export default {
   methods: {
     ...mapActions(['clear', 'findBooks']),
 
+    findBooksWithEncoded() {
+      this.queryParams.page = 1
+      this.queryParams = JSON.parse(JSON.stringify(this.queryParams))
+      this.findBooks(this.queryParams)
+    },
+
     handleClickSearch() {
       this.clear()
-      this.queryParams.page = 1
       this.$nextTick().then(() => {
-        this.findBooks(this.queryParams)
+        this.findBooksWithEncoded()
       })
     },
 
@@ -129,9 +135,8 @@ export default {
       console.log(event)
       if (event.keyCode === 13) {
         this.clear()
-        this.queryParams.page = 1
         this.$nextTick().then(() => {
-          this.findBooks(this.queryParams)
+          this.findBooksWithEncoded()
         })
       }
     },

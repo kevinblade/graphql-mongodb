@@ -1,11 +1,12 @@
 module.exports = {
   books: async (_, args, { collections: files }) =>
     await files.find({}).toArray(),
-  findBooks: async (_, args, { collections: files }) =>
-    await files
+  findBooks: async (_, args, { collections: files }) => {
+    console.log(`args.name = [${args.name.trim()}]`)
+    return await files
       .aggregate([
         {
-          $match: { name: new RegExp(`.*${args.name}.*`, 'gi') }
+          $match: { name: new RegExp(`.*${args.name.trim()}.*`, 'gi') }
         },
         {
           $sort: {
@@ -73,4 +74,5 @@ module.exports = {
         }
       ])
       .toArray()
+  }
 }

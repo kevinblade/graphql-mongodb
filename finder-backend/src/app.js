@@ -31,7 +31,7 @@ const main = async () => {
     })
 
     const app = new Koa()
-    app.use(serve('/Volumes/Second_Disk/Dropbox/Docs/'))
+    app.use(serve(process.env.TRACK_FOLDER))
 
     server.applyMiddleware({ app })
 

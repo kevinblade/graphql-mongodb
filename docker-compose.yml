@@ -12,6 +12,8 @@ services:
       - 'compose_mongodb:mongo'
     ports:
       - '4000:4000'
+    volumes:
+      - 'track_folder:/docs'
     image: 'freedom-lab/finder-backend:v1'
 
   finder-frontend:
@@ -27,6 +29,14 @@ services:
     ports:
       - '8800:80'
     image: 'freedom-lab/finder-frontend:v1'
+
+volumes:
+  track_folder:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Volumes/Second_Disk/Dropbox/Docs/
+      o: bind
 
 networks:
   mynetwork:

@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --exec babel-node -w src src/app.js"
+    "start": "cross-env NODE_ENV=production babel-node src/app.js",
+    "dev": "cross-env NODE_ENV=development nodemon --exec babel-node -w src src/app.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +16,8 @@
     "nodemon": "^1.19.1"
   },
   "dependencies": {
+    "chokidar": "^3.0.2",
+    "cross-env": "^5.2.0",
     "dotenv": "^8.0.0",
     "mongodb": "^3.2.7",
     "walk": "^2.3.14"
