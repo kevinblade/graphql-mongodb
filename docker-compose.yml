@@ -7,7 +7,7 @@ services:
       context: ./finder-backend
       dockerfile: ./Dockerfile
     networks:
-      - docker_default
+      - mynetwork
     external_links:
       - 'compose_mongodb:mongo'
     ports:
@@ -21,7 +21,7 @@ services:
       context: ./finder-frontend
       dockerfile: ./Dockerfile
     networks:
-      - docker_default
+      - mynetwork
     links:
       - 'finder-backend:finder-backend'
     ports:
@@ -29,5 +29,5 @@ services:
     image: 'freedom-lab/finder-frontend:v1'
 
 networks:
-  docker_default:
+  mynetwork:
     external: true
