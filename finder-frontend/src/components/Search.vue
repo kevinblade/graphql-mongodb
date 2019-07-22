@@ -29,8 +29,8 @@
             <el-table-column prop="path" label="Duplicated Path">
               <template slot-scope="scope">
                 <a
+                  :href="`file:///` + scope.row.path"
                   class="highlight-col"
-                  @click="handleClickPath"
                 >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
               </template>
             </el-table-column>
@@ -56,8 +56,8 @@
       <el-table-column prop="path" label="Path">
         <template slot-scope="scope">
           <a
+            :href="`file:///` + scope.row.path"
             class="highlight-col"
-            @click="handleClickPath"
           >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
         </template>
       </el-table-column>
@@ -121,15 +121,15 @@ export default {
       })
     },
 
-    handleClickPath(event) {
-      event.preventDefault()
-      console.log(`VUE_APP_BACKEND_HOST = ${process.env.VUE_APP_BACKEND_HOST}`)
-      const url = `http://${
-        process.env.VUE_APP_BACKEND_HOST
-      }:4000/${event.target.text.replace(/ \/ /g, '/')}`
-      console.log(url)
-      window.open(url)
-    },
+    // handleClickPath(event) {
+    //   event.preventDefault()
+    //   console.log(`VUE_APP_BACKEND_HOST = ${process.env.VUE_APP_BACKEND_HOST}`)
+    //   const url = `http://${
+    //     process.env.VUE_APP_BACKEND_HOST
+    //   }:4000/${event.target.text.replace(/ \/ /g, '/')}`
+    //   console.log(url)
+    //   window.open(url)
+    // },
 
     checkEnter(event) {
       console.log(event)
