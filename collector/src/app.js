@@ -30,9 +30,9 @@ const _insertStat = async ({ collection, root, stat }) => {
         log.info(`total = ${total}`)
       }
       if (stat.type.toLowerCase() === 'file') {
-        log.info(`File ${addedPath} has been added.`)
+        log.info(`File ${filePath} has been added.`)
       } else if (stat.type.toLowerCase() === 'directory') {
-        log.info(`Directory ${addedDir} has been added`)
+        log.info(`Directory ${filePath} has been added`)
       }
     }
   }
