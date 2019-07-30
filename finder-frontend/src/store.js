@@ -1,15 +1,20 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import gql from 'graphql-tag'
 import apollo from './apolloClient'
+import gql from './gql'
 
 Vue.use(Vuex)
 
 const state = {
   isLoading: false,
-  bookIds: [],
   books: {},
-  total: 0
+  total: 0,
+  query: {
+    name: '',
+    page: 1,
+    size: 10
+  },
+  updated: false
 }
 
 const mutations = {
@@ -18,19 +23,17 @@ const mutations = {
   },
 
   CLEAR_BOOKS(state) {
-    state.bookIds = []
     state.books = {}
+    state.total = 0
+    state.query = {
+      name: '',
+      page: 1,
+      size: 10
+    }
   },
 
-  SET_BOOKS(state, { books, total }) {
-    const ids = books.map(x => x._id)
-
-    for (let id in ids) {
-      if (!state.bookIds.includes(ids[id])) {
-        state.bookIds.push(ids[id])
-      }
-    }
-
+  SET_BOOKS(state, { books, total, query }) {
+    state.books = []
     for (let l in books) {
       const book = books[l]
       state.books = {
@@ -44,6 +47,16 @@ const mutations = {
     }
 
     state.total = total
+    state.query = query
+  },
+
+  DELETE_BOOK(state, { _id }) {
+    delete state.books[_id]
+    state.total--
+  },
+
+  UPDATED(state, { updated }) {
+    state.updated = updated
   }
 }
 
@@ -56,34 +69,60 @@ const actions = {
     console.timeEnd(`clear`)
   },
 
+  async deleteBook({ commit, state }, { _id }) {
+    console.time(`deleteBook ${_id}`)
+
+    const deleteVars = {
+      _id
+    }
+
+    const queryVars = {
+      name: state.query.name,
+      page: state.query.page,
+      size: state.query.size
+    }
+
+    commit('SET_LOADING', true)
+
+    commit('UPDATED', { updated: false })
+
+    const response = await apollo.mutate({
+      mutation: gql.DELETE_BOOK,
+      variables: deleteVars,
+      update: (store, { data: { deleteBook } }) => {
+        if (deleteBook) {
+          // eslint-disable-next-line
+          // Read the data from our cache for this query.
+          const data = store.readQuery({
+            query: gql.FIND_BOOKS,
+            variables: queryVars
+          })
+          data.results[0].books = data.results[0].books.filter(book => book._id !== _id)
+          data.results[0].pageInfo.count--
+          store.writeQuery({
+            query: gql.FIND_BOOKS,
+            data
+          })
+        }
+      }
+    })
+
+    if (response.data.deleteBook) {
+      commit('DELETE_BOOK', { _id })
+      commit('UPDATED', { updated: true })
+    }
+
+    commit('SET_LOADING', false)
+
+    console.timeEnd(`deleteBook ${_id}`)
+  },
+
   async findBooks({ commit }, { name, page, size }) {
-    commit('CLEAR_BOOKS')
     console.time(`findBooks ${name}, ${page}, ${size}`)
 
     // Follow query is using variables and aliases which are $name variable and books alias.
-    const query = gql`
-    query FindBooks($name: String!, $page: Int!, $size: Int!) {
-      results: findBooks(name: $name, page: $page, size: $size) {
-        pageInfo {
-          count
-        }
-        books {
-          _id
-          name
-          path
-          size
-          mtime
-          dup_files {
-            name
-            path
-            size
-            mtime
-          }
-        }
-      }
-    }`
 
-    const variables = {
+    const queryVars = {
       name,
       page,
       size
@@ -92,13 +131,16 @@ const actions = {
     commit('SET_LOADING', true)
 
     const response = await apollo.query({
-      query, variables
+      query: gql.FIND_BOOKS,
+      variables: queryVars,
+      fetchPolicy: 'network-only'
     })
 
     if (response.data.results.length > 0) {
       const { books, pageInfo } = response.data.results[0]
-      commit('SET_BOOKS', { books, total: pageInfo.count })
-      console.log(response.data.results)
+      commit('SET_BOOKS', { books, total: pageInfo.count, query: { name, page, size } })
+    } else {
+      commit('SET_BOOKS', { books: [], total: 0, query: { name, page, size } })
     }
 
     commit('SET_LOADING', false)
@@ -118,6 +160,10 @@ const getters = {
 
   total(state) {
     return state.total
+  },
+
+  updated(state) {
+    return state.updated
   }
 }
 

@@ -61,6 +61,15 @@
           >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
         </template>
       </el-table-column>
+      <el-table-column fixed="right" label="Operations" width="120">
+        <template slot-scope="scope">
+          <el-button
+            @click.native.prevent="handleClickDeleteBook(scope.$index)"
+            type="text"
+            size="small"
+          >Delete</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <div class="pagination-container">
       <el-pagination
@@ -105,8 +114,18 @@ export default {
     }
   },
 
+  watch: {
+    updated(val) {
+      if (val) {
+        this.$nextTick().then(() => {
+          this.findBooksWithEncoded()
+        })
+      }
+    }
+  },
+
   methods: {
-    ...mapActions(['clear', 'findBooks']),
+    ...mapActions(['clear', 'findBooks', 'deleteBook']),
 
     findBooksWithEncoded() {
       this.queryParams.page = 1
@@ -115,10 +134,14 @@ export default {
     },
 
     handleClickSearch() {
-      this.clear()
       this.$nextTick().then(() => {
         this.findBooksWithEncoded()
       })
+    },
+
+    handleClickDeleteBook(index) {
+      const book = this.books[index]
+      this.deleteBook({ _id: book._id })
     },
 
     // handleClickPath(event) {
@@ -134,7 +157,6 @@ export default {
     checkEnter(event) {
       console.log(event)
       if (event.keyCode === 13) {
-        this.clear()
         this.$nextTick().then(() => {
           this.findBooksWithEncoded()
         })
@@ -167,7 +189,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isLoading', 'books', 'total'])
+    ...mapGetters(['isLoading', 'books', 'total', 'updated'])
   }
 }
 </script>

@@ -3,5 +3,6 @@ const Result = require('./Result')
 const PageInfo = require('./PageInfo')
 const DupBook = require('./DupBook')
 const Query = require('./Query')
+const Mutation = require('./Mutation')
 
-module.exports = [Query, Book, DupBook, Result, PageInfo]
+module.exports = [Query, Mutation, Book, DupBook, Result, PageInfo]

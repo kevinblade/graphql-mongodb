@@ -3,6 +3,7 @@ import util from 'util'
 import path from 'path'
 import walk from 'walk'
 import chokidar from 'chokidar'
+import _ from 'lodash'
 import mongodb from './db'
 
 let total = 0
@@ -19,22 +20,35 @@ const log = {
 
 const _insertStat = async ({ collection, root, stat }) => {
   // log.info(`stat = ${util.inspect(stat)}`)
-  if (_isIncludes(stat)) {
-    stat.name = stat.name.normalize('NFC')
-    const filePath = path.join(root, stat.name)
-    const data = await collection.findOne({ path: filePath })
-    if (!data) {
-      total++
-      await collection.insertOne({ path: filePath, ...stat })
-      if (!(total % 1000)) {
-        log.info(`total = ${total}`)
-      }
-      if (stat.type.toLowerCase() === 'file') {
-        log.info(`File ${filePath} has been added.`)
-      } else if (stat.type.toLowerCase() === 'directory') {
-        log.info(`Directory ${filePath} has been added`)
+  try {
+    if (_isIncludes(stat)) {
+      stat.name = stat.name.normalize('NFC')
+      const filePath = path.join(root, stat.name)
+      const data = await collection.findOne({ path: filePath })
+      if (!data) {
+        total++
+        await collection.insertOne({ path: filePath, ...stat })
+        if (!(total % 1000)) {
+          log.info(`total = ${total}`)
+        }
+        if (stat.type.toLowerCase() === 'file') {
+          log.info(`File: ${filePath} has been added.`)
+        } else if (stat.type.toLowerCase() === 'directory') {
+          log.info(`Directory: ${filePath} has been added.`)
+        }
+        // } else {
+        //   if (data.size !== stat.size) {
+        //     await collection.updateOne({ path: filePath }, { $set: { ...stat } })
+        //     if (stat.type.toLowerCase() === 'file') {
+        //       log.info(`File: ${filePath} has been updated.`)
+        //     } else if (stat.type.toLowerCase() === 'directory') {
+        //       log.info(`Directory: ${filePath} has been updated.`)
+        //     }
+        //   }
       }
     }
+  } catch (error) {
+    log.error(`Error: ${error.message}`)
   }
 }
 
@@ -52,23 +66,59 @@ const _initWatcher = ({ collection }) => {
 
   watcher
     .on('add', async (addedPath, stat) => {
-      await _insertStat({ collection, root, stat })
+      try {
+        if (stat) {
+          await _insertStat({
+            collection,
+            root: path.join(root, path.dirname(addedPath)),
+            stat: {
+              type: 'file',
+              name: path.basename(addedPath),
+              ...stat
+            }
+          })
+        }
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      }
     })
     .on('addDir', async (addedDir, stat) => {
-      await _insertStat({ collection, root, stat })
+      try {
+        if (stat) {
+          await _insertStat({
+            collection,
+            root: path.join(root, path.dirname(addedDir)),
+            stat: {
+              type: 'directory',
+              name: path.basename(addedDir),
+              ...stat
+            }
+          })
+        }
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      }
     })
-    .on('change', (changedPath, stat) => {
+    .on('change', async (changedPath, stat) => {
       if (stat) {
-        log.info(`File ${changedPath} changed size to ${stat.size}`)
+        log.info(`File: ${changedPath} changed size to ${stat.size}`)
       }
     })
     .on('unlink', async unlinkPath => {
-      log.info(`File ${unlinkPath} has been removed.`)
-      await collection.deleteOne({ path: unlinkPath })
+      try {
+        log.info(`File: ${unlinkPath} has been removed.`)
+        await collection.deleteOne({ path: path.join(root, unlinkPath) })
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      }
     })
     .on('unlinkDir', async unlinkPath => {
-      log.info(`Directory ${unlinkPath} has been removed.`)
-      await collection.deleteOne({ path: unlinkPath })
+      try {
+        log.info(`Directory: ${unlinkPath} has been removed.`)
+        await collection.deleteOne({ path: path.join(root, unlinkPath) })
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      }
     })
 }
 
@@ -77,23 +127,37 @@ const _initWalker = ({ client, collection }) => {
 
   walker
     .on('file', async (root, stat, next) => {
-      // log.info(`file path: ${path.join(root, stat.name)}`)
-      await _insertStat({ collection, root, stat })
-      next()
+      try {
+        // log.info(`file path: ${path.join(root, stat.name)}`)
+        await _insertStat({ collection, root, stat })
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      } finally {
+        next()
+      }
     })
     .on('directory', async (root, stat, next) => {
-      // (`directory path: ${path.join(root, stat.name)}`)
-      await _insertStat({ collection, root, stat })
-      next()
+      try {
+        // (`directory path: ${path.join(root, stat.name)}`)
+        await _insertStat({ collection, root, stat })
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      } finally {
+        next()
+      }
     })
     .on('error', (root, stat, next) => {
       log.error(`error: ${stat.error}`)
       next()
     })
     .on('end', async () => {
-      log.info('Tracking is end.')
-      log.info(`total = ${total}`)
-      await client.close()
+      try {
+        log.info('Tracking is end.')
+        log.info(`total = ${total}`)
+        // await client.close()
+      } catch (error) {
+        log.error(`Error: ${error.message}`)
+      }
     })
 }
 
