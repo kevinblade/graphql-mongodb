@@ -3,7 +3,7 @@ import MongoClient from 'mongodb'
 export default {
   init: async db => {
     try {
-      const client = await MongoClient.connect(process.env.DB_URL)
+      const client = await MongoClient.connect(process.env.DB_URL, { useNewUrlParser: true })
       console.log('MongoDB connection is opened.')
       return client
     } catch (error) {
