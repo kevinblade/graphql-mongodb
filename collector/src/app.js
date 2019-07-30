@@ -101,7 +101,7 @@ const _initWatcher = ({ collection }) => {
     })
     .on('change', async (changedPath, stat) => {
       if (stat) {
-        log.info(`File: ${changedPath} changed size to ${stat.size}`)
+        // log.info(`File: ${changedPath} changed size to ${stat.size}`)
       }
     })
     .on('unlink', async unlinkPath => {
