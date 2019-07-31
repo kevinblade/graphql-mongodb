@@ -52,15 +52,15 @@ const _insertStat = async ({ collection, root, stat }) => {
 }
 
 const _initWatcher = ({ collection }) => {
-  const root = process.env.TRACK_FOLDER
+  const root = process.env.HOST_TRACK_FOLDER
 
   // Initialize watcher.
-  const watcher = chokidar.watch(root, {
+  const watcher = chokidar.watch(process.env.TRACK_FOLDER, {
     ignored: /(^|[\/\\])\../,
     persistent: true,
     awaitWriteFinish: true,
     alwaysStat: true,
-    cwd: root
+    cwd: process.env.TRACK_FOLDER
   })
 
   watcher
@@ -71,9 +71,9 @@ const _initWatcher = ({ collection }) => {
             collection,
             root: path.join(root, path.dirname(addedPath)),
             stat: {
+              ...stat,
               type: 'file',
               name: path.basename(addedPath),
-              ...stat
             }
           })
         }
@@ -88,9 +88,9 @@ const _initWatcher = ({ collection }) => {
             collection,
             root: path.join(root, path.dirname(addedDir)),
             stat: {
+              ...stat,
               type: 'directory',
               name: path.basename(addedDir),
-              ...stat
             }
           })
         }

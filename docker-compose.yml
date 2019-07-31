@@ -30,6 +30,20 @@ services:
       - '8800:80'
     image: 'freedom-lab/finder-frontend:v1'
 
+  watcher:
+    restart: always
+    container_name: compose_watcher
+    build:
+      context: ./watcher
+      dockerfile: ./Dockerfile
+    networks:
+      - mynetwork
+    external_links:
+      - 'compose_mongodb:mongo'
+    volumes:
+      - 'track_folder:/docs'
+    image: 'freedom-lab/watcher:v1'
+
 volumes:
   track_folder:
     driver: local
