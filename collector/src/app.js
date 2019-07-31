@@ -2,7 +2,6 @@ import 'dotenv/config'
 import util from 'util'
 import path from 'path'
 import walk from 'walk'
-import chokidar from 'chokidar'
 import _ from 'lodash'
 import mongodb from './db'
 
@@ -50,76 +49,6 @@ const _insertStat = async ({ collection, root, stat }) => {
   } catch (error) {
     log.error(`Error: ${error.message}`)
   }
-}
-
-const _initWatcher = ({ collection }) => {
-  const root = process.env.TRACK_FOLDER
-
-  // Initialize watcher.
-  const watcher = chokidar.watch(root, {
-    ignored: /(^|[\/\\])\../,
-    persistent: true,
-    awaitWriteFinish: true,
-    alwaysStat: true,
-    cwd: root
-  })
-
-  watcher
-    .on('add', async (addedPath, stat) => {
-      try {
-        if (stat) {
-          await _insertStat({
-            collection,
-            root: path.join(root, path.dirname(addedPath)),
-            stat: {
-              type: 'file',
-              name: path.basename(addedPath),
-              ...stat
-            }
-          })
-        }
-      } catch (error) {
-        log.error(`Error: ${error.message}`)
-      }
-    })
-    .on('addDir', async (addedDir, stat) => {
-      try {
-        if (stat) {
-          await _insertStat({
-            collection,
-            root: path.join(root, path.dirname(addedDir)),
-            stat: {
-              type: 'directory',
-              name: path.basename(addedDir),
-              ...stat
-            }
-          })
-        }
-      } catch (error) {
-        log.error(`Error: ${error.message}`)
-      }
-    })
-    .on('change', async (changedPath, stat) => {
-      if (stat) {
-        // log.info(`File: ${changedPath} changed size to ${stat.size}`)
-      }
-    })
-    .on('unlink', async unlinkPath => {
-      try {
-        log.info(`File: ${unlinkPath} has been removed.`)
-        await collection.deleteOne({ path: path.join(root, unlinkPath) })
-      } catch (error) {
-        log.error(`Error: ${error.message}`)
-      }
-    })
-    .on('unlinkDir', async unlinkPath => {
-      try {
-        log.info(`Directory: ${unlinkPath} has been removed.`)
-        await collection.deleteOne({ path: path.join(root, unlinkPath) })
-      } catch (error) {
-        log.error(`Error: ${error.message}`)
-      }
-    })
 }
 
 const _initWalker = ({ client, collection }) => {
@@ -176,8 +105,6 @@ const _initWalker = ({ client, collection }) => {
     // } catch (e) {
     // } finally {
     // }
-
-    _initWatcher({ collection })
     _initWalker({ client, collection })
   })()
 }
