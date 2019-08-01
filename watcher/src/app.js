@@ -124,10 +124,15 @@ const _initWatcher = ({ collection }) => {
 // Start main function
 {
   ; (async () => {
-    const client = await mongodb.init()
-    if (!client) return
+    try {
+      const client = await mongodb.init()
+      if (!client) return
 
-    const collection = client.db('books').collection('files')
-    _initWatcher({ collection })
+      const collection = client.db('books').collection('files')
+      _initWatcher({ collection })
+    } catch (error) {
+      console.error(`Error: ${error.message}`)
+      exit(1)
+    }
   })()
 }
