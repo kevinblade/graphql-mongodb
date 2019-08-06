@@ -8,7 +8,7 @@ import mongodb from './db'
 let total = 0
 
 const _isIncludes = (stat) => ((stat.type && (stat.type.toLowerCase() === 'file') && [
-  '.pdf', '.epub', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx'
+  '.pdf', '.epub', '.mobi', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx'
 ].includes(path.extname(stat.name))) || (stat.type && (stat.type.toLowerCase() === 'directory') && stat.name.match(/.*\[video\].*/i)))
 
 // Something to use when events are received.

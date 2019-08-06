@@ -10,7 +10,7 @@ module.exports = {
         },
         {
           $sort: {
-            mtime: -1
+            ctime: -1
           }
         },
         {
@@ -51,11 +51,11 @@ module.exports = {
             path: 1,
             name: 1,
             size: 1,
-            mtime: 1,
+            ctime: 1,
             'dup_files.path': 1,
             'dup_files.name': 1,
             'dup_files.size': 1,
-            'dup_files.mtime': 1
+            'dup_files.ctime': 1
           }
         },
         {

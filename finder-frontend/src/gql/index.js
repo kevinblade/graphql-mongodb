@@ -11,12 +11,12 @@ query FindBooks($name: String!, $page: Int!, $size: Int!) {
             name
             path
             size
-            mtime
+            ctime
             dup_files {
                 name
                 path
                 size
-                mtime
+                ctime
             }
         }
     }

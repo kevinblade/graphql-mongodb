@@ -21,9 +21,9 @@
                 <span class="highlight-col">{{ size(scope.row.size) }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="mtime" label="Modification Date" width="200">
+            <el-table-column prop="ctime" label="Creation Date" width="200">
               <template slot-scope="scope">
-                <span class="highlight-col">{{ mtime(scope.row.mtime) }}</span>
+                <span class="highlight-col">{{ ctime(scope.row.ctime) }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="path" label="Duplicated Path">
@@ -48,9 +48,9 @@
           <span class="highlight-col">{{ size(scope.row.size) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="mtime" label="Modification Date" width="200">
+      <el-table-column prop="ctime" label="Creation Date" width="200">
         <template slot-scope="scope">
-          <span class="highlight-col">{{ mtime(scope.row.mtime) }}</span>
+          <span class="highlight-col">{{ ctime(scope.row.ctime) }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="path" label="Path">
@@ -178,7 +178,7 @@ export default {
       await this.findBooks(this.queryParams)
     },
 
-    mtime(value) {
+    ctime(value) {
       const mt = moment(parseInt(value))
       return mt.format('YYYY-MM-DD HH:mm')
     },
