@@ -11,6 +11,10 @@ const _isIncludes = (stat) => ((stat.type && (stat.type.toLowerCase() === 'file'
   '.pdf', '.epub', '.mobi', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx'
 ].includes(path.extname(stat.name))) || (stat.type && (stat.type.toLowerCase() === 'directory') && stat.name.match(/.*\[video\].*/i)))
 
+const _isExcludes = (stat) => ((stat.type && (stat.type.toLowerCase() === 'file')
+  && (stat.name.match(/software.*hardware.*(requirements|list).*\.(pdf|docx|doc|xls|xlsx)/i)
+    || stat.name.match(/_software.*hardware\./i))))
+
 // Something to use when events are received.
 const log = {
   info: console.log.bind(console),
@@ -20,7 +24,7 @@ const log = {
 const _insertStat = async ({ collection, root, stat }) => {
   // log.info(`stat = ${util.inspect(stat)}`)
   try {
-    if (_isIncludes(stat)) {
+    if (_isIncludes(stat) && !_isExcludes(stat)) {
       stat.name = stat.name.normalize('NFC')
       const filePath = path.join(root, stat.name)
       const data = await collection.findOne({ path: filePath })

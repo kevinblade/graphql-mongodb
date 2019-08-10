@@ -39,7 +39,7 @@
       </el-table-column>
       <el-table-column prop="name" label="Name" width="550">
         <template slot-scope="scope">
-          <span class="highlight-col">{{ scope.row.name }}</span>
+          <a :href="`file:///` + scope.row.path" class="highlight-col">{{ scope.row.name }}</a>
         </template>
       </el-table-column>
       <el-table-column prop="dup_count" width="20"></el-table-column>
@@ -56,9 +56,9 @@
       <el-table-column prop="path" label="Path">
         <template slot-scope="scope">
           <a
-            :href="`file:///` + scope.row.path"
+            :href="`file:///` + dirname(scope.row.path)"
             class="highlight-col"
-          >{{ scope.row.path.replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
+          >{{ dirname(scope.row.path).replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="Operations" width="120">
@@ -90,6 +90,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import moment from 'moment'
+import path from 'path'
 import prettyBytes from 'pretty-bytes'
 import Book from './Book'
 
@@ -185,6 +186,10 @@ export default {
 
     size(value) {
       return prettyBytes(parseInt(value))
+    },
+
+    dirname(value) {
+      return path.dirname(value)
     }
   },
 
