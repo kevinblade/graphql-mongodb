@@ -37,9 +37,14 @@
           </el-table>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="Name" width="550">
+      <el-table-column prop="name" label="Name" width="450">
         <template slot-scope="scope">
           <a :href="`file:///` + scope.row.path" class="highlight-col">{{ scope.row.name }}</a>
+        </template>
+      </el-table-column>
+      <el-table-column prop="reading" label="Reading" width="80">
+        <template slot-scope="scope">
+          <span class="highlight-col">{{ scope.row.reading ? 'true' : 'false' }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="dup_count" width="20"></el-table-column>
@@ -61,13 +66,24 @@
           >{{ dirname(scope.row.path).replace('/Volumes/Second_Disk/Dropbox/Docs/', '').replace(/\//g, ' / ') }}</a>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="Operations" width="120">
+      <el-table-column fixed="right" label="Operations" width="220">
         <template slot-scope="scope">
-          <el-button
-            @click.native.prevent="handleClickDeleteBook(scope.$index)"
-            type="text"
-            size="small"
-          >Delete</el-button>
+          <el-row>
+            <el-col :span="12">
+              <el-button
+                @click.native.prevent="handleClickToggleReadBook(scope.$index)"
+                :type="scope.row.reading ? 'warning' : 'primary'"
+                size="small"
+              >{{ scope.row.reading ? 'Stop Read' : 'Start Read' }}</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button
+                @click.native.prevent="handleClickDeleteBook(scope.$index)"
+                type="danger"
+                size="small"
+              >Delete</el-button>
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
     </el-table>
@@ -126,7 +142,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['clear', 'findBooks', 'deleteBook']),
+    ...mapActions(['clear', 'findBooks', 'deleteBook', 'updateBook']),
 
     findBooksWithEncoded() {
       this.queryParams.page = 1
@@ -143,6 +159,11 @@ export default {
     handleClickDeleteBook(index) {
       const book = this.books[index]
       this.deleteBook({ _id: book._id })
+    },
+
+    handleClickToggleReadBook(index) {
+      const book = this.books[index]
+      this.updateBook({ _id: book._id, book: { reading: !book.reading } })
     },
 
     // handleClickPath(event) {

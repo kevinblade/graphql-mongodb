@@ -6,6 +6,7 @@ module.exports = `
     path: String
     size: Int
     ctime: String
+    reading: Boolean
     dup_files: [DupBook]
   }
 `

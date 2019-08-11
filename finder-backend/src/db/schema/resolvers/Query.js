@@ -52,6 +52,7 @@ module.exports = {
             name: 1,
             size: 1,
             ctime: 1,
+            reading: 1,
             'dup_files.path': 1,
             'dup_files.name': 1,
             'dup_files.size': 1,

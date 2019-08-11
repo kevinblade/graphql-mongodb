@@ -55,6 +55,10 @@ const mutations = {
     state.total--
   },
 
+  UPDATE_BOOK(state, { _id, book }) {
+    state.books[_id] = { ...state.books[_id], ...book }
+  },
+
   UPDATED(state, { updated }) {
     state.updated = updated
   }
@@ -115,6 +119,60 @@ const actions = {
     commit('SET_LOADING', false)
 
     console.timeEnd(`deleteBook ${_id}`)
+  },
+
+  async updateBook({ commit, state }, { _id, book }) {
+    console.time(`updateBook ${_id}`)
+
+    const updateVars = {
+      _id,
+      book
+    }
+
+    const queryVars = {
+      name: state.query.name,
+      page: state.query.page,
+      size: state.query.size
+    }
+
+    commit('SET_LOADING', true)
+
+    commit('UPDATED', { updated: false })
+
+    const response = await apollo.mutate({
+      mutation: gql.UPDATE_BOOK,
+      variables: updateVars,
+      update: (store, { data: { updateBook } }) => {
+        if (updateBook) {
+          // eslint-disable-next-line
+          // Read the data from our cache for this query.
+          const data = store.readQuery({
+            query: gql.FIND_BOOKS,
+            variables: queryVars
+          })
+          data.results[0].books = data.results[0].books.map(cache => {
+            if (cache._id !== _id) {
+              return cache
+            } else {
+              return { ...cache, ...book }
+            }
+          })
+          store.writeQuery({
+            query: gql.FIND_BOOKS,
+            data
+          })
+        }
+      }
+    })
+
+    if (response.data.updateBook) {
+      commit('UPDATE_BOOK', { _id })
+      commit('UPDATED', { updated: true })
+    }
+
+    commit('SET_LOADING', false)
+
+    console.timeEnd(`updateBook ${_id}`)
   },
 
   async findBooks({ commit }, { name, page, size }) {

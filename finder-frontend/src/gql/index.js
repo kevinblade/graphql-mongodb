@@ -12,6 +12,7 @@ query FindBooks($name: String!, $page: Int!, $size: Int!) {
             path
             size
             ctime
+            reading
             dup_files {
                 name
                 path
@@ -27,7 +28,13 @@ mutation DeleteBook($_id: String!) {
     deleteBook(_id: $_id)
 }`
 
+const UPDATE_BOOK = gql`
+mutation UpdateBook($_id: String!, $book: BookInput!) {
+    updateBook(_id: $_id, book: $book)
+}`
+
 export default {
     FIND_BOOKS,
-    DELETE_BOOK
+    DELETE_BOOK,
+    UPDATE_BOOK
 }
